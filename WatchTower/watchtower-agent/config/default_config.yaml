@@ -1,0 +1,10 @@
+mongo_uri: "mongodb://localhost:27017/"
+db_name: "watchtower_agent_log"
+collection_name: "events"
+log_file: "logs/agent.log"
+server_url: "http://localhost:8000/data/store"
+
+# Watch Configs
+cpu_threshold: 80
+memory_threshold: 80
+disk_threshold: 80

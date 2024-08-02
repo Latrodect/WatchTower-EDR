@@ -1,5 +1,5 @@
 from fastapi import APIRouter
-from api.models import DataRequestCPU, DataRequestDisk, DataRequestNetwork, DataRequestMemory
+from api.models import DataRequestCPU, DataRequestDisk, DataRequestNetwork, DataRequestMemory, DataRequestEvent
 from api.services import insert_data, fetch_data
 
 router = APIRouter()
@@ -41,3 +41,11 @@ async def retrieve_data(key: str):
     if data:
         return data
     return {"error": "Data not found"}
+
+@router.post("/store/event")
+async def store_event(data: DataRequestEvent):
+    print(data)
+    result = insert_data(data)
+    if result:
+        return {"status": "success"}
+    return {"status": "failed"}

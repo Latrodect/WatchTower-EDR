@@ -26,3 +26,12 @@ class DataRequestMemory(BaseModel):
     memory_usage: float
     memory_virtual: dict
     message: str
+
+class DataRequestEvent(BaseModel):
+    timestamp: str
+    event_category: int
+    time_generator: str
+    source_name: str
+    event_id: int
+    event_type: int
+    event_data: tuple

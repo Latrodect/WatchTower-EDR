@@ -18,4 +18,4 @@ class Monitor:
         self.cpu_monitor.check_usage()
         self.memory_monitor.check_usage()
         self.disk_monitor.check_usage()
-        self.network_monitor.check_traffic()
+        self.network_monitor.check_usage()

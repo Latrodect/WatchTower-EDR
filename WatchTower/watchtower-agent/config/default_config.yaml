@@ -3,6 +3,7 @@ db_name: "watchtower_agent_log"
 collection_name: "events"
 log_file: "logs/agent.log"
 server_url: "http://localhost:8000/data/store"
+network_threshold: 1000
 
 # Watch Configs
 cpu_threshold: 80

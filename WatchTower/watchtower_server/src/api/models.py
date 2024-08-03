@@ -1,5 +1,5 @@
 from pydantic import BaseModel
-
+from typing import List
 class DataRequestCPU(BaseModel):
     timestamp: str
     cpu_usage: float
@@ -35,3 +35,14 @@ class DataRequestEvent(BaseModel):
     event_id: int
     event_type: int
     event_data: tuple
+
+class DataRequestNetworkTraffic(BaseModel):
+    timestamp: str
+    source_ip: str
+    destination_ip: str
+    package_length: int
+
+class DataRequestConnections(BaseModel):
+    timestamp: str
+    connections: List[dict]
+    message: str

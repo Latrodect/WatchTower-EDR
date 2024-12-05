@@ -3,7 +3,9 @@ from scapy.all import sniff, IP
 import requests
 import datetime
 from core.event_handler import EventHandler
+from rabbitmq.producer import MonitoringProducer
 
+producer = MonitoringProducer()
 class NetworkTrafficMonitor:
     def __init__(self, config) -> None:
         self.event_handler = EventHandler()
@@ -11,6 +13,7 @@ class NetworkTrafficMonitor:
         self.endpoint = ""
         self.threshold = config.get("network_threshold", 1000)
         self.connections = []
+        producer.connect()
 
     def monitor_network(self):
         sniff(prn=self.monitor, store=0, filter="ip")
@@ -55,8 +58,11 @@ class NetworkTrafficMonitor:
 
     def send_data_to_server(self, data):
         try:
+            producer.publish(data)
             url = f'{self.server_url}/{self.endpoint}'
             response = requests.post(url, json=data)
             response.raise_for_status()
         except requests.RequestException as e:
             self.event_handler.log_event('Server Error', f'Failed to send data to server: {e}')
+        finally:
+            producer.close()

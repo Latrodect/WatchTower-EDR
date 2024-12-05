@@ -4,6 +4,9 @@ import requests
 import logging
 
 from core.event_handler import EventHandler
+from rabbitmq.producer import MonitoringProducer
+
+producer = MonitoringProducer()
 
 if platform.system() == "Windows":
     import win32evtlog
@@ -14,6 +17,7 @@ class EventLogMonitor:
         self.event_handler = EventHandler()
         self.server_url = config.get("server_url", "http://localhost:8000/store/event")
         self.os_type = platform.system()
+        producer.connect()
 
     def monitor(self):
         if self.os_type == "Windows":
@@ -57,7 +61,10 @@ class EventLogMonitor:
 
     def send_data_to_server(self, data):
         try:
+            producer.publish(data)
             response = requests.post(self.server_url, json=data)
             response.raise_for_status()
         except requests.RequestException as e:
             self.event_handler.log_event('Server Error', f'Failed to send data to server: {e}')
+        finally:
+            producer.close()

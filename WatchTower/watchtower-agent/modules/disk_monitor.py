@@ -4,7 +4,9 @@ from core.policies import disk_usage_policy
 from core.event_handler import EventHandler
 import datetime
 import os
+from rabbitmq.producer import MonitoringProducer
 
+producer = MonitoringProducer()
 
 class DiskMonitor:
     def __init__(self, config):
@@ -12,6 +14,7 @@ class DiskMonitor:
         self.event_handler = EventHandler()
         self.server_url = config.get("server_url", "http://localhost:8000/")
         self.endpoint = "disk"
+        producer.connect()
 
     def check_usage(self):
         disk_info = psutil.disk_usage("/")
@@ -47,6 +50,7 @@ class DiskMonitor:
 
     def send_data_to_server(self, data):
         try:
+            producer.publish(data)
             response = requests.post(
                 url=f"{self.server_url}/{self.endpoint}", json=data
             )
@@ -55,3 +59,5 @@ class DiskMonitor:
             self.event_handler.log_event(
                 "Server Error", f"Failed to send data to server: {e}"
             )
+        finally:
+            producer.close()

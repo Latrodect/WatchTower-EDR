@@ -3,18 +3,19 @@ import requests
 from core.policies import cpu_usage_policy
 from core.event_handler import EventHandler
 import datetime
+from rabbitmq.producer import MonitoringProducer
 
-
+producer = MonitoringProducer()
 class CPUMonitor:
     def __init__(self, config):
         self.cpu_threshold = config.get("cpu_threshold", 80)
         self.event_handler = EventHandler()
         self.server_url = config.get("server_url", "http://localhost:8000/data/store")
         self.endpoint = "cpu"
+        producer.connect()
 
     def check_usage(self):
         cpu_usage = psutil.cpu_percent(percpu=False)
-        per_cpu_usage = psutil.cpu_percent(percpu=True)
         cpu_freq = psutil.cpu_freq()._asdict() if psutil.cpu_freq() else {}
         cpu_count = psutil.cpu_count()
         cpu_stats = psutil.cpu_stats()._asdict()
@@ -45,6 +46,7 @@ class CPUMonitor:
 
     def send_data_to_server(self, data):
         try:
+            producer.publish(data)
             response = requests.post(
                 url=f"{self.server_url}/{self.endpoint}", json=data
             )
@@ -53,3 +55,5 @@ class CPUMonitor:
             self.event_handler.log_event(
                 "Server Error", f"Failed to send data to server: {e}"
             )
+        finally:
+            producer.close()
